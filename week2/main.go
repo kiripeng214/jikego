@@ -12,7 +12,7 @@ func main() {
 	count, err := dao.GetCount()
 	if errors.Is(err, sql.ErrNoRows) {
 		fmt.Printf("sql error: %T %v\n", errors.Cause(err), errors.Cause(err))
-		//fmt.Printf("stack trace: %+v\n",err)
+		fmt.Printf("stack trace: %+v\n", err)
 		fmt.Println(errors.Unwrap(err))
 	} else {
 		fmt.Println(count)
