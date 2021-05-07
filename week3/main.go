@@ -1,15 +1,28 @@
 package main
 
 import (
-	"fmt"
-	"golang.org/x/sync/errgroup"
+	"github.com/gin-gonic/gin"
 	"kiripeng214/jikego/week3/xnet"
+	"log"
+	"net/http"
 )
 
+func initRouter() *http.Server {
+
+	router := gin.Default()
+	router.GET("/hello", func(c *gin.Context) {
+		c.String(200, "hello")
+	})
+	srv := &http.Server{
+		Handler: router,
+	}
+
+	return srv
+}
+
 func main() {
-	group := &errgroup.Group{}
-	group.Go(xnet.InitServer)
-	if err := group.Wait(); err != nil {
-		fmt.Println("Get errors:", err)
+	kiApp := xnet.New(xnet.HttpSever(initRouter()))
+	if err := kiApp.Run(); err != nil {
+		log.Println(err)
 	}
 }
