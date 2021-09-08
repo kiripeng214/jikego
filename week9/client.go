@@ -2,47 +2,26 @@ package main
 
 import (
 	"fmt"
+	"kiripeng214/jikego/week9/message"
 	"kiripeng214/jikego/week9/protocol"
-	"log"
-	"net"
+	"kiripeng214/jikego/week9/xconn"
 	"time"
 )
 
-func sender(conn net.Conn) {
-
-}
-
 func main() {
 
-	server := "127.0.0.1:8080"
-
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", server)
-
-	if err != nil {
-		log.Println(err)
-		return
-
+	xcon := xconn.Conn{
+		NetWork: "tcp",
+		Address: "127.0.0.1",
+		Port:    "8080",
 	}
-
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
-
-	if err != nil {
-		log.Println(err)
-		return
-
-	}
-
-	defer conn.Close()
-
-	fmt.Println("connect success")
-
+	xcon.ClientInt()
+	defer xcon.ClientClose()
 	packet := protocol.NewDefaultPacket([]byte{})
 	for i := 0; i < 1000; i++ {
 		words := "{\"Id\":1,\"Name\":\"golang\",\"Message\":\"message\"}"
 		packet.Data = []byte(words)
-		fmt.Println(string(packet.Data))
-		conn.Write(packet.Packet())
-
+		xcon.Write(&message.Message{Data: packet.Data})
 	}
 
 	fmt.Println("send over")

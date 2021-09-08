@@ -3,7 +3,6 @@ package protocol
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 )
 
 const (
@@ -38,12 +37,11 @@ func (this *Packet) Packet() []byte {
 	return append(append([]byte(this.Header), this.IntToBytes(int32(len(this.Data)))...), this.Data...)
 }
 
-func (this *Packet) UnPacket(readerChannel chan []byte) []byte {
+func (this *Packet) UnPacket() ([]byte, []byte) {
 	dataLen := int32(len(this.Data))
-	fmt.Println(dataLen)
+	var whole []byte
 	var i int32
 	for i = 0; i < dataLen; i++ {
-		fmt.Println(i)
 		//够了
 		if dataLen < i+this.HeaderLength+this.SaveDataLength {
 			break
@@ -59,17 +57,17 @@ func (this *Packet) UnPacket(readerChannel chan []byte) []byte {
 			//得到包
 			packageData := this.Data[saveDataLenBeginIndex+this.SaveDataLength : saveDataLenBeginIndex+this.SaveDataLength+actualDataLen]
 			//发送
-			readerChannel <- packageData
+			whole = packageData
 			//处理下一个包
 			i += this.HeaderLength + this.SaveDataLength + actualDataLen - 1
+			break
 		}
 	}
-	fmt.Println(i, dataLen)
 	if i >= dataLen {
-		return []byte{}
+		return []byte{}, whole
 	}
 
-	return this.Data[i:]
+	return this.Data[i:], whole
 }
 
 func (this *Packet) IntToBytes(i int32) []byte {

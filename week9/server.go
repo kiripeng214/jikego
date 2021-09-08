@@ -2,43 +2,34 @@ package main
 
 import (
 	"fmt"
-	"kiripeng214/jikego/week9/protocol"
-	"log"
-	"net"
+	"io"
+	"kiripeng214/jikego/week9/xconn"
 )
 
 func main() {
-	listen, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		return
+	//listen, err := net.Listen("tcp", ":8080")
+	//if err != nil {
+	//	return
+	//}
+	xcon := xconn.Conn{
+		NetWork: "tcp",
+		Address: "127.0.0.1",
+		Port:    "8080",
 	}
-
-	conn, err := listen.Accept()
-	defer conn.Close()
-	if err != nil {
-		return
-	}
-	packet := protocol.NewDefaultPacket([]byte{})
-	tempChanel := make(chan []byte)
-
-	go func() {
-		buff := make([]byte, 1024)
-		for {
-			n, err := conn.Read(buff)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			packet.Data = append(packet.Data, buff[:n]...)
-			packet.Data = packet.UnPacket(tempChanel)
-		}
-
-	}()
+	xcon.ServerInit()
+	defer xcon.ServerClose()
 	for {
-		select {
-		case msg := <-tempChanel:
-			fmt.Println(string(msg))
+		read, err := xcon.Read()
+		if err == io.EOF {
+			xcon.ServerInit()
+		} else if err != nil {
+			fmt.Println(err)
+			return
 		}
-	}
 
+		if read != nil {
+			fmt.Println(string(read.Data))
+		}
+
+	}
 }
