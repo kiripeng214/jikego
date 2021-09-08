@@ -62,6 +62,7 @@ func (c *Conn) ClientClose() (err error) {
 
 func (c *Conn) Read() (*message.Message, error) {
 	var whole []byte
+	var buff []byte
 	m := &message.Message{}
 	if len(c.readPack.Data) != 0 {
 		c.readPack.Data, whole = c.readPack.UnPacket()
@@ -71,7 +72,7 @@ func (c *Conn) Read() (*message.Message, error) {
 		}
 	}
 	for {
-		buff := make([]byte, 1024)
+		buff = make([]byte, 1024)
 		n, err := c.server.Read(buff)
 		if err != nil {
 			return nil, err
